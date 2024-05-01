@@ -9,7 +9,7 @@ from utils.paths import Defaults, Process
 user = ctypes.windll.user32
 
 def panic_script():
-    os.startfile('panic.bat')
+    os.system('taskkill /F /IM pythonw.exe')
 
 def set_borderless(root):
     root.overrideredirect(1)

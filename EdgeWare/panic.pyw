@@ -6,10 +6,11 @@ from utils.paths import Data, Defaults
 try:
     utils.show_file(Data.HID_TIME)
 except:
-    ''
+    pass
+
 if os.path.exists(Data.HID_TIME):
-    utils.hide_file(Data.HID_TIME)
     # Do nothing if timer is present
+    utils.hide_file(Data.HID_TIME)
 else:
     # Continue if no timer
     utils.set_wallpaper(Defaults.PANIC_WALLPAPER)
