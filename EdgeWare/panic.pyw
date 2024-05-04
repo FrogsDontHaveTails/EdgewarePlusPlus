@@ -1,11 +1,12 @@
 import os
+
 from utils import utils
 from utils.paths import Data, Defaults
 
 # Checking timer
 try:
     utils.show_file(Data.HID_TIME)
-except:
+except Exception:
     pass
 
 if os.path.exists(Data.HID_TIME):
