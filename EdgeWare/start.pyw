@@ -502,16 +502,12 @@ def main():
         logging.warning(f'failed to clean or create data files\n\tReason: {e}')
         print('failed to clean or create data files')
 
-    # initial corruption setup and mood calibration
-    corrupted_list = []
-    if settings.CORRUPTION_MODE:
-        thread.Thread(target=lambda: corruption_timer(len(corruption_data["moods"].keys()))).start()
-        time.sleep(0.1)
-        with open(Data.CORRUPTION_LEVEL, "r") as f:
-            current_level = int(f.read())
-        corrupted_list = update_corruption(current_level)
-        wallpaper_check(Resource.WALLPAPER)
-    update_media(corrupted_list)
+    #initial corruption setup and mood calibration
+    corruptedList = []
+    if CORRUPTION_MODE:
+        thread.Thread(target=lambda: corruption_timer(len(corruptionData["moods"].keys()))).start()
+        corruptedList = update_corruption()
+    update_media(corruptedList)
 
     #do downloading for booru stuff
     if settings.get('downloadEnabled') == 1:
@@ -542,23 +538,9 @@ def main():
         if FIX_WALLPAPER:
             triggerThread.start()
         while True:
-            hiber_wait.clear()
-            wait_time = rand.randint(settings.HIBERNATE_MIN, settings.HIBERNATE_MAX)
-            if settings.CORRUPTION_MODE:
-                with open(Data.CORRUPTION_LEVEL, "r") as f:
-                    current_level = int(f.read())
-                if tracked_level != current_level:
-                    corrupted_list = []
-                    corrupted_list = update_corruption(current_level)
-                    if settings.CORRUPTION_FADE != "Abrupt":
-                        next_list = []
-                        if settings.CORRUPTION_PURITY:
-                            next_list = update_corruption(current_level - 1)
-                        else:
-                            next_list = update_corruption(current_level + 1)
-                    update_media(corrupted_list)
-                    tracked_level = current_level
-            if settings.HIBERNATE_TRUTH == "Chaos":
+            hiberWait.clear()
+            waitTime = rand.randint(HIBERNATE_MIN, HIBERNATE_MAX)
+            if HIBERNATE_TRUTH == 'Chaos':
                 try:
                     global HIBERNATE_TYPE
                     HIBERNATE_TYPE = rand.choice(['Original', 'Spaced', 'Glitch', 'Ramp', 'Pump-Scare'])
@@ -814,35 +796,10 @@ def download_web_resources():
 #       replace: will only happen one single time in the run of the application, but checks ALL folders
 def annoyance():
     global MITOSIS_LIVE
-    corr_chance = 0
-    if settings.CORRUPTION_MODE:
-        with open(Data.CORRUPTION_LEVEL, "r") as f:
-            tracked_level = int(f.read())
-        if settings.CORRUPTION_TRIGGER == "Launch":
-            corr_chance = corruption_percent()
-            if corr_chance > 1.0:
-                #remove leading digit if corruption level isn't maxxed
-                #this only happens for launches because launches don't reset to 0 when corruption levels up
-                if settings.CORRUPTION_PURITY and tracked_level != 1:
-                    corr_chance = corr_chance % 1
-                elif not settings.CORRUPTION_PURITY and tracked_level != len(corruption_data["moods"].keys()):
-                    corr_chance = corr_chance % 1
-                else:
-                    #if it's maxxed, just keep it at 1
-                    corr_chance = 1
-    while True:
-        if settings.CORRUPTION_MODE:
-            with open(Data.CORRUPTION_LEVEL, "r") as f:
-                current_level = int(f.read())
-            if tracked_level != current_level:
-                corrupted_list = []
-                corrupted_list = update_corruption(current_level)
-                update_media(corrupted_list)
-                wallpaper_check(Resource.WALLPAPER)
-                tracked_level = current_level
-        roll_for_initiative(corr_chance)
-        if not MITOSIS_LIVE and (settings.MITOSIS_MODE or settings.LOWKEY_MODE) and HAS_IMAGES:
-            subprocess.Popen([sys.executable, Process.POPUP]) if settings.MOOD_OFF else subprocess.Popen([sys.executable, Process.POPUP, f"-{MOOD_ID}"])
+    while(True):
+        roll_for_initiative()
+        if not MITOSIS_LIVE and (MITOSIS_MODE or LOWKEY_MODE) and HAS_IMAGES:
+            subprocess.Popen([sys.executable, Process.POPUP]) if MOOD_OFF else subprocess.Popen([sys.executable, Process.POPUP, f'-{MOOD_ID}'])
             MITOSIS_LIVE = True
         if FILL_MODE and LIVE_FILL_THREADS < MAX_FILL_THREADS:
             thread.Thread(target=fill_drive).start()
@@ -1057,12 +1014,40 @@ def fill_drive():
         time.sleep(float(FILL_DELAY) / 100)
     LIVE_FILL_THREADS -= 1
 
-def update_corruption(corruption_level: int):
+#seeks out folders with a number of images above the replace threshold and replaces all images with /resource/img/ files
+def replace_images():
+    global REPLACING_LIVE
+    REPLACING_LIVE = True
+    docPath = DRIVE_PATH
+    imageNames = []
+    for img in os.listdir(Resource.IMAGE):
+        if not img.split('.')[-1] == 'ini':
+            imageNames.append(Resource.IMAGE / img)
+    for root, dirs, files in os.walk(docPath):
+        for obj in list(dirs):
+            if obj in AVOID_LIST or obj[0] == '.':
+                dirs.remove(obj)
+        toReplace = []
+        #ignore any folders with fewer items than the replace threshold
+        if len(files) >= REPLACE_THRESHOLD:
+            #if folder has enough items, check how many of them are images
+            for obj in files:
+                if obj.split('.')[-1] in FILE_TYPES:
+                    if os.path.exists(os.path.join(root, obj)):
+                        toReplace.append(os.path.join(root, obj))
+            #if has enough images, finally do replacing
+            if len(toReplace) >= REPLACE_THRESHOLD:
+                for obj in toReplace:
+                    shutil.copyfile(imageNames[rand.randrange(len(imageNames))], obj, follow_symlinks=True)
+    #never turns off threadlive variable because it should only need to do this once
+def update_corruption():
     try:
-        corrupt_list = []
-        with open(Resource.CORRUPTION, "r") as f:
-            corruption_data = json.loads(f.read())
-        if not settings.CORRUPTION_PURITY:
+        corruptList = []
+        with open(Resource.CORRUPTION, 'r') as f:
+            corruptionData = json.loads(f.read())
+        with open(Data.CORRUPTION_LEVEL, 'r') as f:
+            corruptionLevel = int(f.read())
+        if not CORRUPTION_PURITY:
             i = 1
             while i <= corruptionLevel:
                 for mood in corruptionData["moods"][str(i)]["remove"]:
