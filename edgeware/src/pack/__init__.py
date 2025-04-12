@@ -10,6 +10,10 @@ from pack.load import list_media, load_active_moods, load_config, load_corruptio
 
 
 class Pack:
+    image_ranks = {}
+    video_ranks = {}
+    audio_ranks = {}
+
     def __init__(self, root: Path):
         logging.info(f"Loading pack at {root.relative_to(PATH)}.")
 
@@ -40,22 +44,43 @@ class Pack:
         logging.info(f"Active moods: {self.active_moods()}")
 
     def block_corruption_moods(self) -> None:
+        active_moods = self.active_moods()
         for level in self.corruption_levels:
-            active_moods = self.active_moods()
+            # Remove moods that aren't enabled by the user from each corruption level
             level.moods = MoodSet([mood for mood in level.moods if mood in active_moods])
 
     def filter_media(self, media_list: list[Path]) -> list[Path]:
         active_moods = self.active_moods()
         return list(filter(lambda media: self.index.media_moods.get(media.name) in active_moods, media_list))
 
-    def random_image(self) -> Path | None:
-        return random.choice(self.filter_media(self.images) or [None])
+    def random_media(self, media_list: list[Path], media_ranks: dict[Path, int]) -> Path | None:
+        filtered = self.filter_media(media_list)
+        if not filtered:
+            return None
+
+        # Give lower preference to media that has been recently selected
+        max_rank = len(media_list)
+        ranks = [media_ranks.get(media, max_rank) for media in filtered]
+        weights = [2 ** (16 * rank / max_rank) for rank in ranks]
+        media = random.choices(filtered, weights, k=1)[0]
+
+        for key, value in media_ranks.items():
+            media_ranks[key] = min(value + 1, max_rank)
+        media_ranks[media] = 1
+
+        return media
+
+    def random_image(self, unweighted: bool = False) -> Path | None:
+        if unweighted:
+            images = self.filter_media(self.images)
+            return random.choice(images) if images else None
+        return self.random_media(self.images, self.image_ranks)
 
     def random_video(self) -> Path | None:
-        return random.choice(self.filter_media(self.videos) or [None])
+        return self.random_media(self.videos, self.video_ranks)
 
     def random_audio(self) -> Path | None:
-        return random.choice(self.filter_media(self.audio) or [None])
+        return self.random_media(self.audio, self.audio_ranks)
 
     def random_subliminal_overlay(self) -> Path:
         return random.choice(self.subliminal_overlays)  # Guaranteed to be non-empty
@@ -73,16 +98,19 @@ class Pack:
         return (self.find_media_mood(media).captions or self.index.default.captions) if media else self.find_list("captions")
 
     def random_caption(self, media: Path | None = None) -> str | None:
-        return random.choice(self.find_captions(media) or [None])
+        captions = self.find_captions(media)
+        return random.choice(captions) if captions else None
 
     def random_clicks_to_close(self, media: Path) -> int:
         return random.randint(1, self.find_media_mood(media).max_clicks)
 
-    def random_subliminal_message(self) -> str:
-        return random.choice(self.find_list("subliminals") or self.find_captions())
+    def random_subliminal_message(self) -> str | None:
+        subliminals = self.find_list("subliminals")
+        return random.choice(subliminals) if subliminals else self.random_caption()
 
-    def random_notification(self) -> str:
-        return random.choice(self.find_list("notifications") or self.find_captions())
+    def random_notification(self) -> str | None:
+        notifications = self.find_list("notifications")
+        return random.choice(notifications) if notifications else self.random_caption()
 
     def random_denial(self) -> str:
         return random.choice(self.find_list("denial") or ["Not for you~"])

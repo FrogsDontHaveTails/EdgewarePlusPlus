@@ -13,13 +13,11 @@ from tkinter import (
     OptionMenu,
     StringVar,
     messagebox,
-    ttk,
 )
 from tkinter.font import Font
 
 import os_utils
 import utils
-from config_window.import_export import export_pack, import_pack
 from config_window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
 from config_window.utils import (
     log_file,
@@ -33,7 +31,6 @@ from paths import Data
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
-PACK_IMPORT_TEXT = 'If you\'re familiar with Edgeware, you may know that by default you can only have one pack imported under "resource". But you can also import multiple packs under "data/packs" using the "Import New Pack" button and choose which one you want to use with the dropdown menu on the left. This way you only need to import each pack once and you can conveniently switch between them. After choosing a pack from the dropdown menu, click the "Save & Refresh" button to update the config window to reflect your choice.\n\nPacks can still be imported and exported the old way using the "Import Default Pack" and "Export Default Pack" buttons, make sure to select "default" from the dropdown if you want to do this!'
 PRESET_TEXT = "Please be careful before importing unknown config presets! Double check to make sure you're okay with the settings before launching Edgeware."
 
 
@@ -74,30 +71,10 @@ class FileTab(ScrollFrame):
         # TODO: Save default preset if there are none?
 
         # Save/load
-        Label(self.viewPort, text="Save/Load", font=title_font, relief=GROOVE).pack(pady=2)
-
-        pack_import_message = Message(self.viewPort, text=PACK_IMPORT_TEXT, justify=CENTER, width=675)
-        message_group.append(pack_import_message)
-        pack_import_message.pack(fill="both")
+        Label(self.viewPort, text="Save", font=title_font, relief=GROOVE).pack(pady=2)
 
         Button(self.viewPort, text="Save Settings", command=lambda: write_save(vars)).pack(fill="x", pady=2)
         Button(self.viewPort, text="Save & Refresh", command=lambda: save_and_refresh(vars)).pack(fill="x", pady=2)
-
-        import_export_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        import_export_frame.pack(fill="x", pady=2)
-
-        pack_selection_frame = Frame(import_export_frame)
-        pack_selection_frame.pack(fill="both", pady=2, expand=1)
-        Data.PACKS.mkdir(parents=True, exist_ok=True)
-        pack_list = ["default"] + os.listdir(Data.PACKS)
-        pack_dropdown = OptionMenu(pack_selection_frame, vars.pack_path, *pack_list)
-        pack_dropdown["menu"].insert_separator(1)
-        pack_dropdown.pack(padx=2, fill="x", side="left")
-        Button(pack_selection_frame, text="Import New Pack", command=lambda: import_pack(False)).pack(padx=2, fill="x", side="left", expand=1)
-
-        ttk.Separator(import_export_frame, orient="horizontal").pack(fill="x", pady=2)
-        Button(import_export_frame, text="Import Default Pack", command=lambda: import_pack(True)).pack(padx=2, pady=2, fill="x", side="left", expand=1)
-        Button(import_export_frame, text="Export Default Pack", command=export_pack).pack(padx=2, pady=2, fill="x", side="left", expand=1)
 
         # Presets
         Label(self.viewPort, text="Config Presets", font=title_font, relief=GROOVE).pack(pady=2)

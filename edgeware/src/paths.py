@@ -35,6 +35,12 @@ class Assets:
     DEFAULT_SUBLIMINAL_OVERLAY = ROOT / "default_subliminal_overlay.gif"
     DEFAULT_THEME_DEMO = ROOT / "default_theme_demo.png"
 
+    # Tutorial pages
+    TUTORIAL = ROOT / "tutorial"
+
+    TUTORIAL_INTRO = TUTORIAL / "intro.html"
+    TUTORIAL_GETSTARTED = TUTORIAL / "gettingstarted.html"
+
 
 @dataclass
 class Data:
