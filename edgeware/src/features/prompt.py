@@ -6,6 +6,7 @@ from features.theme import get_theme
 from pack import Pack
 from settings import Settings
 from state import State
+from eventmanager.eventmanager import EventManager
 
 
 class Prompt(Toplevel):
@@ -70,5 +71,8 @@ class Prompt(Toplevel):
                 )  # fmt: skip
 
         if d[len(a)][len(b)] <= max_mistakes:
+            EventManager().trigger("prompt_submit_success", d[len(a)][len(b)])
             self.destroy()
             self.state.prompt_active = False
+        else:
+            EventManager().trigger("prompt_submit_failed", d[len(a)][len(b)])

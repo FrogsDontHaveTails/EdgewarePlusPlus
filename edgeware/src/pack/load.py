@@ -36,6 +36,26 @@ def try_load(path: Path, load: Callable[[str], T]) -> T | None:
 def length_equal_to(data: dict, key: str, equal_to: str) -> None:
     Schema(Equal(len(data[equal_to]), msg=f'Length of "{key}" must be equal to "{equal_to}"'))(len(data[key]))
 
+def load_xtoys(paths: PackPaths) -> dict:
+    def load(content) -> dict:
+        xtoys = json.loads(content)
+
+        Schema(
+            {
+                "events": {
+                    str: {
+                        "action": str,
+                        "intensity": Number(scale=0),
+                        "duration": Number(scale=0),
+                    }
+                }
+            }
+        )(xtoys)
+
+        return xtoys["events"]
+
+    return try_load(paths.xtoys, load) or {}
+
 
 def load_corruption(paths: PackPaths) -> list[CorruptionLevel]:
     def load(content: str) -> list[CorruptionLevel]:

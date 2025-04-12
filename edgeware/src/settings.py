@@ -165,3 +165,7 @@ class Settings:
         self.corruption_themes = not bool(self.config["corruptionThemeCycle"])
         self.corruption_purity = bool(self.config["corruptionPurityMode"])
         self.corruption_dev_mode = bool(self.config["corruptionDevMode"])
+
+        # XToys
+        self.xtoys_enabled = bool(self.config["xtoysEnabled"])
+        self.xtoys_websocket = self.config["xtoysWebsocket"]

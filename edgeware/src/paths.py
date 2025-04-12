@@ -108,6 +108,7 @@ class PackPaths:
         self.info = self.root / "info.json"
         self.splash = [self.root / f"loading_splash.{extension}" for extension in ["png", "gif", "jpg", "jpeg", "bmp"]]
         self.wallpaper = self.root / "wallpaper.png"
+        self.xtoys = self.root / "xtoys.json"
 
         # Deprecated fallback options
         self.captions = self.root / "captions.json"

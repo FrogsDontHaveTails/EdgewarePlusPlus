@@ -37,6 +37,8 @@ from panic import start_panic_listener
 from roll import RollTarget, roll_targets
 from settings import Settings, first_launch_configure
 from state import State
+from xtoys_event_handler import XToysEventHandler
+import asyncio
 
 
 def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) -> None:
@@ -56,6 +58,9 @@ if __name__ == "__main__":
     pack = Pack(settings.pack_path)
     state = State()
     pygame.init()
+
+    xtoys_event_handler = XToysEventHandler(settings, pack)
+    asyncio.run(xtoys_event_handler.start())
 
     settings.corruption_mode = settings.corruption_mode and pack.corruption_levels
 

@@ -125,6 +125,9 @@ class Vars:
 
         self.message_off = self.make(BooleanVar, "messageOff")
 
+        self.xtoys_enabled = self.make(BooleanVar, "xtoysEnabled")
+        self.xtoys_websocket = self.make(StringVar, "xtoysWebsocket")
+
     def make(self, var_init: type[ConfigVar], key: str) -> ConfigVar:
         value = self.config[key]
         var = var_init()

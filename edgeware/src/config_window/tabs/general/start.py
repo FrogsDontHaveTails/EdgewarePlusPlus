@@ -394,3 +394,6 @@ class StartTab(ScrollFrame):
             'This is the old panic key. To use this hotkey you must be "focused" on an Edgeware image or video popup. Click on a popup before using.',
         )
         Button(panic_frame, text="Perform Panic", command=send_panic).pack(fill="both", side="left", expand=1)
+        
+        # Other
+        Label(self.viewPort, text="Xtoys", font=title_font, relief=GROOVE).pack(pady=2)

@@ -1,0 +1,14 @@
+{
+  "events": {
+    "prompt_submit_success": {
+      "action": "reward",
+      "intensity": 100,
+      "duration": 5
+    },
+    "prompt_submit_failed": {
+      "action": "punish",
+      "intensity": 100,
+      "duration": 5
+    }
+  }
+}

@@ -43,6 +43,7 @@ from config_window.tabs.modes.corruption import CorruptionModeTab
 from config_window.tabs.modes.dangerous_modes import DangerousModesTab
 from config_window.tabs.modes.hibernate import HibernateModeTab
 from config_window.tabs.troubleshooting import TroubleshootingTab
+from config_window.tabs.general.xtoys import XToysTab
 from config_window.utils import (
     all_children,
     config,
@@ -140,7 +141,7 @@ class Config(Tk):
         general_notebook.add(InfoTab(vars, title_font, message_group, pack), text="Pack Info")  # pack information
         general_notebook.add(BooruTab(vars, title_font), text="Booru Downloader")  # tab for booru downloader
         general_notebook.add(DefaultFileTab(vars, message_group), text="Change Default Files")  # tab for changing default files
-
+        general_notebook.add(XToysTab(vars, title_font), text="XToys")  # tab for xtoys settings
         annoyance_tab = ttk.Frame(notebook)
         notebook.add(annoyance_tab, text="Annoyance/Runtime")
         annoyance_notebook = ttk.Notebook(annoyance_tab)

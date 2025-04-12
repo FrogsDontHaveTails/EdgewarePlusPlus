@@ -33,6 +33,8 @@
   "mitosisStrength": 2,
   "avoidList": "edgeware>AppData",
   "booruName": "",
+  "xtoysWebsocket": "",
+  "xtoysEnabled": 0,
   "booruMinScore": -5,
   "desktopIcons": 1,
   "tagList": "all",
